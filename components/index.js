@@ -3,7 +3,8 @@ import {
   createStackNavigator,
   createSwitchNavigator,
   createAppContainer,
-  createBottomTabNavigator
+  createBottomTabNavigator,
+  createMaterialTopTabNavigator
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -11,58 +12,68 @@ import {
   AuthLoadingScreen,
   LoginScreen,
   TodosScreen,
-  ProfileScreen
+  AccountScreen
 } from './screens';
+
+const BottomTabs = createBottomTabNavigator(
+  {
+    Todos: {
+      screen: TodosScreen,
+      navigationOptions: ({ navigation }) => ({
+        title: navigation.state.routeName
+      })
+    },
+    Account: {
+      screen: AccountScreen,
+      navigationOptions: ({ navigation }) => ({
+        title: navigation.state.routeName
+      })
+    }
+  },
+  {
+    initialRouteName: 'Todos',
+    defaultNavigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused }) => {
+        const { routeName } = navigation.state;
+        let iconName;
+        switch (routeName) {
+          case 'Todos':
+            iconName = 'assignment';
+            break;
+          case 'Account':
+            iconName = 'account-circle';
+            break;
+        }
+        return (
+          <MaterialIcons
+            name={iconName}
+            size={28}
+            color={focused ? '#f4511e' : '#ccc'}
+          />
+        );
+      },
+      tabBarOptions: {
+        style: { backgroundColor: '#FFF' },
+        activeTintColor: '#f4511e'
+      }
+    }),
+    animationEnabled: true,
+    swipeEnabled: true
+  }
+);
+
+BottomTabs.navigationOptions = ({ navigation }) => {
+  const { routeName } = navigation.state.routes[navigation.state.index];
+  const headerTitle = routeName;
+  return {
+    headerTitle
+  };
+};
 
 const AppStack = createStackNavigator(
   {
     Home: {
-      screen: createBottomTabNavigator(
-        {
-          Home: {
-            screen: TodosScreen,
-            navigationOptions: ({ navigation }) => ({
-              title: navigation.state.routeName
-            })
-          },
-          Profile: {
-            screen: ProfileScreen,
-            navigationOptions: ({ navigation }) => ({
-              title: navigation.state.routeName
-            })
-          }
-        },
-        {
-          initialRouteName: 'Home',
-          defaultNavigationOptions: ({ navigation }) => ({
-            tabBarIcon: ({ focused }) => {
-              console.log('focused = ', focused);
-              const { routeName } = navigation.state;
-              let iconName;
-              switch (routeName) {
-                case 'Home':
-                  iconName = 'home';
-                  break;
-                case 'Profile':
-                  iconName = 'account-circle';
-                  break;
-              }
-              return (
-                <MaterialIcons
-                  name={iconName}
-                  size={28}
-                  color={focused ? '#2f95dc' : '#ccc'}
-                />
-              );
-            }
-          }),
-          animationEnabled: true,
-          swipeEnabled: true
-        }
-      ),
-      navigationOptions: ({ navigation }) => ({
-        title: navigation.state.routeName
-      })
+      screen: BottomTabs
     }
   },
   {
@@ -80,8 +91,6 @@ const AppStack = createStackNavigator(
     }
   }
 );
-
-AppStack.navigationOptions;
 
 const AuthStack = createStackNavigator(
   { LogIn: LoginScreen },

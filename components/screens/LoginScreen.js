@@ -16,6 +16,7 @@ class Login extends Component {
   static navigationOptions = {
     title: 'Login'
   };
+
   state = {
     password: '',
     email: '',
@@ -24,17 +25,21 @@ class Login extends Component {
       password: ''
     }
   };
+
   handleInput = (key, text) => {
     this.setState({ [key]: text });
   };
+
   onSubmit = async () => {
     const { email, password } = this.state;
     const errors = this.validate({ email, password });
     this.setState({ errors });
     if (Object.keys(errors).length === 0) {
       await this.props.login({ email, password });
+      this.props.navigation.navigate('App');
     }
   };
+
   validate = ({ email, password }) => {
     const errors = {};
     if (!isEmail(email)) {
@@ -45,11 +50,10 @@ class Login extends Component {
     }
     return errors;
   };
-  componentWillUnmount = () => {
-    this.props.logout();
-  };
+
   render() {
     const { email, password, errors } = this.state;
+    const { loading } = this.props;
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
         <TextInput
@@ -83,15 +87,10 @@ class Login extends Component {
             {errors.password}
           </Text>
         )}
-        <Button title="Login" onPress={this.onSubmit} />
+        <Button title="Login" disabled={loading} onPress={this.onSubmit} />
       </KeyboardAvoidingView>
     );
   }
-
-  // _signInAsync = async () => {
-  //   await AsyncStorage.setItem('userToken', 'abc');
-  //   this.props.navigation.navigate('App');
-  // };
 }
 
 const styles = StyleSheet.create({
@@ -109,15 +108,13 @@ const styles = StyleSheet.create({
   }
 });
 
-const mapStateToProps = ({ loginForm }) => ({
-  loading: loginForm.loading,
-  errors: loginForm.errors
-});
+const mapStateToProps = ({ user, todos }) => {
+  return { loading: user.loading };
+};
 
 export default connect(
-  null,
+  mapStateToProps,
   {
-    login: user.login,
-    logout: user.logout
+    login: user.login
   }
 )(Login);

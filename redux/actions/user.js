@@ -7,8 +7,7 @@ import {
 } from '../types';
 
 export default {
-  login: ({ email, password }) => async (dispatch, getState) => {
-    console.log('fired action!');
+  login: ({ email, password }) => async dispatch => {
     dispatch({ type: LOGIN_REQUEST });
     await fetch('https://reqres.in/api/login', {
       method: 'POST',
@@ -19,17 +18,15 @@ export default {
       body: JSON.stringify({ email, password })
     })
       .then(({ _bodyInit }) => JSON.parse(_bodyInit))
-      .then(({ token }) => {
-        console.log('token', token);
-        AsyncStorage.setItem('token', token);
+      .then(async ({ token }) => {
+        await AsyncStorage.setItem('token', token);
         dispatch({ type: LOGIN_SUCCESS, payload: { id: 1, token, email } });
       })
       .catch(error => {
-        console.log('error', error);
         dispatch({ type: LOGIN_FAILED, payload: { error } });
       });
   },
-  logout: () => {
+  logout: () => dispatch => {
     dispatch({ type: LOGOUT_USER });
   }
 };
