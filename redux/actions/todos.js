@@ -17,7 +17,10 @@ import {
   TOGGLE_TODO_FAILED,
   DELETE_TODO_SUCCESS,
   DELETE_TODO_REQUEST,
-  DELETE_TODO_FAILED
+  DELETE_TODO_FAILED,
+  CLEAR_COMPLETED_REQUEST,
+  CLEAR_COMPLETED_SUCCESS,
+  CLEAR_COMPLETED_FAILED
 } from '../types';
 
 const todo = new schema.Entity('todos');
@@ -65,7 +68,7 @@ export default {
               },
               body: JSON.stringify({ complete })
             }
-          ).then(async ({ _bodyInit }) => await JSON.parse(_bodyInit));
+          ).then(({ _bodyInit }) => JSON.parse(_bodyInit));
         })
       );
       const {
@@ -166,6 +169,44 @@ export default {
       .catch(error => {
         dispatch({ type: DELETE_TODO_FAILED, payload: { error } });
       });
+  },
+  clearCompleted: () => async (dispatch, getState) => {
+    const { todos, todoIds } = getState().todos;
+    const completedIds = todoIds
+      .map(id => todos[id])
+      .filter(({ complete }) => complete)
+      .map(({ id }) => id);
+    completedIds.forEach(id => {
+      delete todos[id];
+    });
+    const activeIds = completedIds.filter(id => todoIds.includes(id));
+    console.log('todos = ', todos);
+    console.log('completedIds = ', completedIds);
+    console.log('activeIds = ', activeIds);
+    // dispatch({ type: CLEAR_COMPLETED_REQUEST });
+    // try {
+    //   await Promise.all(
+    //     completedIds.map(async todoId => {
+    //       return await fetch(
+    //         `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${todoId}`,
+    //         {
+    //           method: 'DELETE',
+    //           headers: {
+    //             Accept: 'application/json',
+    //             'Content-Type': 'application/json'
+    //           },
+    //           body: JSON.stringify({ complete })
+    //         }
+    //       ).then(({ _bodyInit }) => JSON.parse(_bodyInit));
+    //     })
+    //   );
+    //   dispatch({
+    //     type: CLEAR_COMPLETED_SUCCESS,
+    //     payload: { todos, todoIds: activeIds }
+    //   });
+    // } catch (error) {
+    //   dispatch({ type: CLEAR_COMPLETED_FAILED, payload: { error } });
+    // }
   },
   setFilter: filter => dispatch => {
     dispatch({ type: SET_FILTER, payload: { filter } });
