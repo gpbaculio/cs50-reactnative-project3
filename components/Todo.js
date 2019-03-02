@@ -6,7 +6,8 @@ import {
   StyleSheet,
   Switch,
   TouchableOpacity,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { connect } from 'react-redux';
@@ -16,20 +17,24 @@ import { todos } from '../redux/actions';
 class Todo extends Component {
   state = {
     editing: false,
-    text: ''
+    text: '',
+    load: false
   };
+
   componentDidMount() {
     this.setState({ text: this.props.text });
   }
+
   handleInputChange = (key, val) => {
     this.setState({ [key]: val });
   };
 
   toggleEditing = () => {
-    this.setState({ editing: !this.state.editing });
+    this.setState({ editing: !this.state.editing, load: false });
   };
 
   editTodo = async () => {
+    this.setState({ load: true });
     await this.props.editTodo({ text: this.state.text, id: this.props.id });
     this.toggleEditing();
   };
@@ -41,7 +46,10 @@ class Todo extends Component {
       [
         {
           text: 'Confirm',
-          onPress: async () => await this.props.deleteTodo(this.props.id)
+          onPress: async () => {
+            this.setState({ load: true });
+            await this.props.deleteTodo(this.props.id);
+          }
         },
         {
           text: 'Cancel',
@@ -54,12 +62,14 @@ class Todo extends Component {
 
   toggleTodo = async () => {
     const { id, complete } = this.props;
+    this.setState({ load: true });
     await this.props.toggleTodo({ id, complete: !complete });
+    this.setState({ load: false });
   };
 
   render() {
     const { text, complete } = this.props;
-    const { editing } = this.state;
+    const { editing, load } = this.state;
     const textComponent = (
       <TouchableOpacity
         style={styles.textWrap}
@@ -97,6 +107,11 @@ class Todo extends Component {
         <Switch onValueChange={this.toggleTodo} value={complete} />
         {editing ? editingComponent : textComponent}
         {editing ? doneButton : removeButton}
+        {load && (
+          <View style={styles.loading}>
+            <ActivityIndicator animating size="small" />
+          </View>
+        )}
       </View>
     );
   }
@@ -126,6 +141,16 @@ const styles = StyleSheet.create({
     height: 24,
     fontSize: 20,
     color: '#4D4D4D'
+  },
+  loading: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, .2)'
   }
 });
 

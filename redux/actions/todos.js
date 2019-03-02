@@ -24,7 +24,6 @@ const todo = new schema.Entity('todos');
 
 export default {
   fetchTodos: page => async dispatch => {
-    console.log('fetchTodos page ', page);
     dispatch({ type: FETCH_TODOS_REQUEST });
     await fetch(
       `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos?sortBy=createdAt&order=desc&l=10&p=${page}`
@@ -125,7 +124,7 @@ export default {
       });
   },
   toggleTodo: ({ id, complete }) => async dispatch => {
-    dispatch({ type: TOGGLE_TODO_REQUEST });
+    dispatch({ type: TOGGLE_TODO_REQUEST, payload: { id, complete } });
     await fetch(
       `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${id}`,
       {
@@ -142,7 +141,10 @@ export default {
         dispatch({ type: TOGGLE_TODO_SUCCESS, payload: { todo } });
       })
       .catch(error => {
-        dispatch({ type: TOGGLE_TODO_FAILED, payload: { error } });
+        dispatch({
+          type: TOGGLE_TODO_FAILED,
+          payload: { error, id, complete }
+        });
       });
   },
   deleteTodo: id => async dispatch => {

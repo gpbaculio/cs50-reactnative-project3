@@ -53,7 +53,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#FFF',
     borderTopColor: '#F5F5F5',
-    borderTopWidth: 1
+    borderTopWidth: 1,
+    width: '100%'
   },
   filters: {
     flexDirection: 'row'

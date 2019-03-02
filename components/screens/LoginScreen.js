@@ -87,7 +87,12 @@ class Login extends Component {
             {errors.password}
           </Text>
         )}
-        <Button title="Login" disabled={loading} onPress={this.onSubmit} />
+        <Button
+          color="#f4511e"
+          title={loading ? 'Logging in' : 'Login'}
+          disabled={loading}
+          onPress={this.onSubmit}
+        />
       </KeyboardAvoidingView>
     );
   }
@@ -97,13 +102,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    backgroundColor: '#F5F5F5'
   },
   input: {
     width: '70%',
     height: 40,
-    borderWidth: 1,
-    marginBottom: 5,
+    backgroundColor: '#FFF',
+    marginBottom: 8,
     padding: 5
   }
 });

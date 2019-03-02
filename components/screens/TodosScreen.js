@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 
+import Header from '../Header';
 import Todo from '../Todo';
 import Filter from '../Filter';
 
@@ -19,30 +20,13 @@ import { todos } from '../../redux/actions';
 
 class TodosScreen extends Component {
   state = {
-    text: '',
-    completeAll: false,
     page: 1,
     refetching: false
-  };
-
-  handleInputChange = (key, val) => {
-    this.setState({ [key]: val });
   };
 
   componentDidMount = async () => {
     await this.props.fetchTodos(this.state.page);
     this.setState({ page: this.state.page + 1 });
-  };
-
-  toggleCompleteAll = async () => {
-    const completeAll = !this.state.completeAll;
-    await this.props.toggleCompleteAll(completeAll);
-    this.setState({ completeAll });
-  };
-
-  addTodo = async () => {
-    await this.props.addTodo(this.state.text);
-    this.setState({ text: '' });
   };
 
   renderTodos = () => {
@@ -62,46 +46,21 @@ class TodosScreen extends Component {
     const { refetching } = this.state;
     return (
       <View style={styles.container}>
-        {!!loading.fetchTodos && !refetching ? (
-          <ActivityIndicator />
-        ) : (
-          <View style={{ flex: 1 }}>
-            <View style={styles.inputContainer}>
-              <TouchableOpacity
-                disabled={loading.toggleAll}
-                onPress={this.toggleCompleteAll}>
-                <Text
-                  style={[
-                    styles.completeAll,
-                    this.renderTodos().every(({ complete }) => complete) && {
-                      color: 'green'
-                    }
-                  ]}>
-                  {String.fromCharCode(10003)}
-                </Text>
-              </TouchableOpacity>
-              <TextInput
-                disabled={loading.addTodo}
-                returnKeyType="done"
-                blurOnSubmit={false}
-                onSubmitEditing={this.addTodo}
-                placeholder="What needs to be done?"
-                style={styles.input}
-                onChangeText={text => this.handleInputChange('text', text)}
-                value={this.state.text}
-              />
-            </View>
-            <FlatList
-              style={styles.todosContainer}
-              data={this.renderTodos()}
-              renderItem={({ item }) => <Todo {...item} />}
-              keyExtractor={({ id }) => id}
-              ItemSeparatorComponent={this.renderSeparator}
-              ListFooterComponent={this.renderFooter}
-              onEndReachedThreshold={0.01}
-              onEndReached={this.handleLoadMore}
-            />
-            <Filter count={this.renderTodos().length} />
+        <Header todos={this.renderTodos()} />
+        <FlatList
+          style={styles.todosContainer}
+          data={this.renderTodos()}
+          renderItem={({ item }) => <Todo {...item} />}
+          keyExtractor={({ id }) => id}
+          ItemSeparatorComponent={this.renderSeparator}
+          ListFooterComponent={this.renderFooter}
+          onEndReachedThreshold={0.01}
+          onEndReached={this.handleLoadMore}
+        />
+        <Filter count={this.renderTodos().length} />
+        {((loading.fetchTodos && !refetching) || loading.toggleAll) && (
+          <View style={styles.loading}>
+            <ActivityIndicator animating size="large" />
           </View>
         )}
       </View>
@@ -109,7 +68,6 @@ class TodosScreen extends Component {
   }
   handleLoadMore = async () => {
     if (!this.props.endReached) {
-      console.log('reach if', this.props.endReached);
       this.setState({ page: this.state.page + 1, refetching: true });
       await this.props.fetchTodos(this.state.page);
       this.setState({ refetching: false });
@@ -122,18 +80,15 @@ class TodosScreen extends Component {
 }
 
 const styles = StyleSheet.create({
-  completeAll: {
-    fontSize: 30,
-    color: '#CCC',
-    marginLeft: 5
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  loading: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
-    backgroundColor: '#FEFEFE',
-    borderBottomColor: '#F5F5F5',
-    borderBottomWidth: 1
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, .2)'
   },
   container: {
     backgroundColor: '#f5f5f5',
@@ -143,20 +98,10 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
     alignItems: 'center'
   },
-  input: {
-    flex: 1,
-    height: 50,
-    marginLeft: 5,
-    fontSize: 24
-  },
   todosContainer: {
     flex: 1,
-    backgroundColor: '#fff'
-  },
-  footer: {
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderColor: '#CCCCCC'
+    backgroundColor: '#fff',
+    width: '100%'
   },
   separator: {
     borderWidth: 1,

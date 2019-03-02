@@ -11,7 +11,13 @@ import {
   ADD_TODO_FAILED,
   EDIT_TODO_REQUEST,
   EDIT_TODO_SUCCESS,
-  EDIT_TODO_FAILED
+  EDIT_TODO_FAILED,
+  TOGGLE_TODO_REQUEST,
+  TOGGLE_TODO_SUCCESS,
+  TOGGLE_TODO_FAILED,
+  DELETE_TODO_REQUEST,
+  DELETE_TODO_SUCCESS,
+  DELETE_TODO_FAILED
 } from '../types';
 
 initialState = {
@@ -112,6 +118,13 @@ const todos = (state = initialState, { type, payload }) => {
     case TOGGLE_TODO_REQUEST:
       return {
         ...state,
+        todos: {
+          ...state.todos,
+          [payload.id]: {
+            ...state.todos[payload.id],
+            complete: payload.complete
+          }
+        },
         loading: { ...state.loading, toggleTodo: true }
       };
     case TOGGLE_TODO_SUCCESS:
@@ -126,6 +139,13 @@ const todos = (state = initialState, { type, payload }) => {
     case TOGGLE_TODO_FAILED:
       return {
         ...state,
+        todos: {
+          ...state.todos,
+          [payload.id]: {
+            ...state.todos[payload.id],
+            complete: !payload.complete
+          }
+        },
         error: payload.error,
         loading: { ...state.loading, toggleTodo: false }
       };
@@ -136,7 +156,7 @@ const todos = (state = initialState, { type, payload }) => {
       };
     case DELETE_TODO_SUCCESS:
       const { deletedId } = payload;
-      const { deletedId, ...todos } = state.todos;
+      const { deletedId: removeProp, ...todos } = state.todos;
       const todoIds = state.todoIds.filter(id => id !== deletedId);
       return {
         ...state,
