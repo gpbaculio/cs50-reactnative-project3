@@ -26,10 +26,11 @@ import {
 const todo = new schema.Entity('todos');
 
 export default {
-  fetchTodos: page => async dispatch => {
+  fetchTodos: page => async (dispatch, getState) => {
+    const { id } = getState().user;
     dispatch({ type: FETCH_TODOS_REQUEST });
     await fetch(
-      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos?sortBy=createdAt&order=desc&l=10&p=${page}`
+      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/${id}/todos?sortBy=createdAt&order=desc&l=10&p=${page}`
     )
       .then(({ _bodyInit }) => JSON.parse(_bodyInit))
       .then(res => {
@@ -55,11 +56,13 @@ export default {
       .map(id => todos[id])
       .filter(todo => todo.complete !== complete)
       .map(({ id }) => id);
+
     try {
+      const { id } = getState().user;
       const updatedTodos = await Promise.all(
         ids.map(async todoId => {
           return await fetch(
-            `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${todoId}`,
+            `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/${id}/todos/${todoId}`,
             {
               method: 'PUT',
               headers: {
@@ -82,10 +85,11 @@ export default {
       dispatch({ type: TOGGLE_COMPLETE_ALL_FAILED, payload: { error } });
     }
   },
-  addTodo: text => async dispatch => {
+  addTodo: text => async (dispatch, getState) => {
+    const { id } = getState().user;
     dispatch({ type: ADD_TODO_REQUEST });
     await fetch(
-      'http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos',
+      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/${id}/todos`,
       {
         method: 'POST',
         headers: {
@@ -103,10 +107,11 @@ export default {
         dispatch({ type: LOGIN_FAILED, payload: { error } });
       });
   },
-  editTodo: ({ text, id }) => async dispatch => {
+  editTodo: ({ text, id }) => async (dispatch, getState) => {
     dispatch({ type: EDIT_TODO_REQUEST });
+    const { id: userId } = getState().user;
     await fetch(
-      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${id}`,
+      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/${userId}/todos/${id}`,
       {
         method: 'PUT',
         headers: {
@@ -126,10 +131,11 @@ export default {
         dispatch({ type: EDIT_TODO_FAILED, payload: { error } });
       });
   },
-  toggleTodo: ({ id, complete }) => async dispatch => {
+  toggleTodo: ({ id, complete }) => async (dispatch, getState) => {
     dispatch({ type: TOGGLE_TODO_REQUEST, payload: { id, complete } });
+    const { id: userId } = getState().user;
     await fetch(
-      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${id}`,
+      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/${userId}/todos/${id}`,
       {
         method: 'PUT',
         headers: {
@@ -150,10 +156,11 @@ export default {
         });
       });
   },
-  deleteTodo: id => async dispatch => {
+  deleteTodo: id => async (dispatch, getState) => {
     dispatch({ type: DELETE_TODO_REQUEST });
+    const { id: userId } = getState().user;
     await fetch(
-      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${id}`,
+      `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/${userId}/todos/${id}`,
       {
         method: 'DELETE',
         headers: {
@@ -171,7 +178,10 @@ export default {
       });
   },
   clearCompleted: () => async (dispatch, getState) => {
-    const { todos, todoIds } = getState().todos;
+    const {
+      todos: { ...todos },
+      todoIds
+    } = getState().todos;
     const completedIds = todoIds
       .map(id => todos[id])
       .filter(({ complete }) => complete)
@@ -179,34 +189,30 @@ export default {
     completedIds.forEach(id => {
       delete todos[id];
     });
-    const activeIds = completedIds.filter(id => todoIds.includes(id));
-    console.log('todos = ', todos);
-    console.log('completedIds = ', completedIds);
-    console.log('activeIds = ', activeIds);
-    // dispatch({ type: CLEAR_COMPLETED_REQUEST });
-    // try {
-    //   await Promise.all(
-    //     completedIds.map(async todoId => {
-    //       return await fetch(
-    //         `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${todoId}`,
-    //         {
-    //           method: 'DELETE',
-    //           headers: {
-    //             Accept: 'application/json',
-    //             'Content-Type': 'application/json'
-    //           },
-    //           body: JSON.stringify({ complete })
-    //         }
-    //       ).then(({ _bodyInit }) => JSON.parse(_bodyInit));
-    //     })
-    //   );
-    //   dispatch({
-    //     type: CLEAR_COMPLETED_SUCCESS,
-    //     payload: { todos, todoIds: activeIds }
-    //   });
-    // } catch (error) {
-    //   dispatch({ type: CLEAR_COMPLETED_FAILED, payload: { error } });
-    // }
+    const activeIds = Object.keys(todos).map(id => todos[id].id);
+    dispatch({ type: CLEAR_COMPLETED_REQUEST });
+    try {
+      await Promise.all(
+        completedIds.map(async todoId => {
+          return await fetch(
+            `http://5c6577a119df280014b626f2.mockapi.io/cs50m/api/users/1/todos/${todoId}`,
+            {
+              method: 'DELETE',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+              }
+            }
+          ).then(({ _bodyInit }) => JSON.parse(_bodyInit));
+        })
+      );
+      dispatch({
+        type: CLEAR_COMPLETED_SUCCESS,
+        payload: { todos, todoIds: activeIds }
+      });
+    } catch (error) {
+      dispatch({ type: CLEAR_COMPLETED_FAILED, payload: { error } });
+    }
   },
   setFilter: filter => dispatch => {
     dispatch({ type: SET_FILTER, payload: { filter } });

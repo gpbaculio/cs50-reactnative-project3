@@ -5,7 +5,7 @@ import { user } from '../../redux/actions';
 
 class AccountScreen extends Component {
   logout = async () => {
-    await AsyncStorage.removeItem('token');
+    await AsyncStorage.clear();
     await this.props.logout();
     this.props.navigation.navigate('Auth');
   };

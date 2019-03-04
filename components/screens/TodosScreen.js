@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
 import {
-  Text,
   View,
   StyleSheet,
-  CheckBox,
-  TextInput,
   Dimensions,
   FlatList,
-  ActivityIndicator,
-  TouchableOpacity
+  ActivityIndicator
 } from 'react-native';
 import { connect } from 'react-redux';
 
@@ -57,8 +53,10 @@ class TodosScreen extends Component {
           onEndReachedThreshold={0.01}
           onEndReached={this.handleLoadMore}
         />
-        <Filter count={this.renderTodos().length} />
-        {((loading.fetchTodos && !refetching) || loading.toggleAll) && (
+        <Filter todos={this.renderTodos()} />
+        {((loading.fetchTodos && !refetching) ||
+          loading.toggleAll ||
+          loading.clearCompleted) && (
           <View style={styles.loading}>
             <ActivityIndicator animating size="large" />
           </View>

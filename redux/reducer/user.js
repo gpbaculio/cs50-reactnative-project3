@@ -25,7 +25,6 @@ const user = (state = initialState, action) => {
         ...state,
         id: action.payload.id,
         email: action.payload.email,
-        token: action.payload.token,
         loading: false
       };
     case LOGIN_FAILED:

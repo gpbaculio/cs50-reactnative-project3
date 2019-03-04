@@ -19,12 +19,17 @@ export default {
     })
       .then(({ _bodyInit }) => JSON.parse(_bodyInit))
       .then(async ({ token }) => {
+        const payload = { id: 1, email };
         await AsyncStorage.setItem('token', token);
-        dispatch({ type: LOGIN_SUCCESS, payload: { id: 1, token, email } });
+        await AsyncStorage.setItem('user', JSON.stringify(payload));
+        dispatch({ type: LOGIN_SUCCESS, payload });
       })
       .catch(error => {
         dispatch({ type: LOGIN_FAILED, payload: { error } });
       });
+  },
+  persistUser: payload => async dispatch => {
+    dispatch({ type: LOGIN_SUCCESS, payload });
   },
   logout: () => dispatch => {
     dispatch({ type: LOGOUT_USER });

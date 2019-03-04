@@ -7,10 +7,14 @@ import { todos } from '../redux/actions';
 
 class Filter extends Component {
   render() {
+    const showClear =
+      !!this.props.todos.length &&
+      this.props.todos.some(({ complete }) => complete);
     return (
       <View style={styles.container}>
-        <Text>{this.props.count} count</Text>
-        <View style={styles.filters}>
+        <Text>{this.props.todos.length} count</Text>
+        <View
+          style={[styles.filters, !showClear && { alignItems: 'flex-start' }]}>
           <TouchableOpacity
             onPress={() => this.props.setFilter('All')}
             style={[
@@ -36,7 +40,10 @@ class Filter extends Component {
             <Text>Completed</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity
+          style={!showClear && { opacity: 0 }}
+          disabled={!showClear}
+          onPress={() => this.props.clearCompleted()}>
           <Text>Clear Completed</Text>
         </TouchableOpacity>
       </View>
@@ -75,6 +82,7 @@ export default connect(
     filter: todos.filter
   }),
   {
-    setFilter: todos.setFilter
+    setFilter: todos.setFilter,
+    clearCompleted: todos.clearCompleted
   }
 )(Filter);

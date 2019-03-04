@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Button, View, AsyncStorage, StyleSheet } from 'react-native';
 
 class HomeScreen extends React.Component {

@@ -6,8 +6,10 @@ import {
   StyleSheet,
   AsyncStorage
 } from 'react-native';
+import { connect } from 'react-redux';
+import { user } from '../../redux/actions';
 
-export default class AuthLoadingScreen extends Component {
+class AuthLoadingScreen extends Component {
   constructor() {
     super();
     this._bootstrapAsync();
@@ -16,7 +18,11 @@ export default class AuthLoadingScreen extends Component {
   // Fetch the token from storage then navigate to our appropriate place
   _bootstrapAsync = async () => {
     const token = await AsyncStorage.getItem('token');
-
+    const userData = await AsyncStorage.getItem('user');
+    console.log('userData = ', userData);
+    if (token) {
+      await this.props.persistUser(JSON.parse(userData));
+    }
     // This will switch to the App screen or Auth screen and this loading
     // screen will be unmounted and thrown away.
     this.props.navigation.navigate(token ? 'App' : 'Auth');
@@ -40,3 +46,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   }
 });
+
+export default connect(
+  null,
+  {
+    persistUser: user.persistUser
+  }
+)(AuthLoadingScreen);

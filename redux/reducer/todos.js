@@ -17,7 +17,11 @@ import {
   TOGGLE_TODO_FAILED,
   DELETE_TODO_REQUEST,
   DELETE_TODO_SUCCESS,
-  DELETE_TODO_FAILED
+  DELETE_TODO_FAILED,
+  CLEAR_COMPLETED_REQUEST,
+  CLEAR_COMPLETED_SUCCESS,
+  CLEAR_COMPLETED_FAILED,
+  LOGOUT_USER
 } from '../types';
 
 initialState = {
@@ -31,13 +35,18 @@ initialState = {
     addTodo: false,
     editTodo: false,
     toggleTodo: false,
-    deleteTodo: false
+    deleteTodo: false,
+    clearCompleted: false
   },
   endReached: false
 };
 
 const todos = (state = initialState, { type, payload }) => {
   switch (type) {
+    case LOGOUT_USER:
+      return {
+        ...initialState
+      };
     case SET_FILTER:
       return { ...state, filter: payload.filter };
     case FETCH_TODOS_REQUEST:
@@ -169,6 +178,24 @@ const todos = (state = initialState, { type, payload }) => {
         ...state,
         error: payload.error,
         loading: { ...state.loading, deleteTodo: false }
+      };
+    case CLEAR_COMPLETED_REQUEST:
+      return {
+        ...state,
+        loading: { ...state.loading, clearCompleted: true }
+      };
+    case CLEAR_COMPLETED_SUCCESS:
+      return {
+        ...state,
+        todos: payload.todos,
+        todoIds: payload.todoIds,
+        loading: { ...state.loading, clearCompleted: false }
+      };
+    case CLEAR_COMPLETED_FAILED:
+      return {
+        ...state,
+        error: payload.error,
+        loading: { ...state.loading, clearCompleted: false }
       };
     default:
       return state;

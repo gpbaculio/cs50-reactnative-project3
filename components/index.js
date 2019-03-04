@@ -3,8 +3,7 @@ import {
   createStackNavigator,
   createSwitchNavigator,
   createAppContainer,
-  createBottomTabNavigator,
-  createMaterialTopTabNavigator
+  createBottomTabNavigator
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 
