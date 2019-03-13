@@ -19,7 +19,6 @@ class AuthLoadingScreen extends Component {
   _bootstrapAsync = async () => {
     const token = await AsyncStorage.getItem('token');
     const userData = await AsyncStorage.getItem('user');
-    console.log('userData = ', userData);
     if (token) {
       await this.props.persistUser(JSON.parse(userData));
     }

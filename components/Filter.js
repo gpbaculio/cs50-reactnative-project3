@@ -44,7 +44,7 @@ class Filter extends Component {
           style={!showClear && { opacity: 0 }}
           disabled={!showClear}
           onPress={() => this.props.clearCompleted()}>
-          <Text>Clear Completed</Text>
+          <Text style={{ color: '#cc9a9a' }}>Clear Completed</Text>
         </TouchableOpacity>
       </View>
     );

@@ -123,11 +123,9 @@ export default {
     )
       .then(({ _bodyInit }) => JSON.parse(_bodyInit))
       .then(todo => {
-        console.log('edit res todo', todo);
         dispatch({ type: EDIT_TODO_SUCCESS, payload: { todo } });
       })
       .catch(error => {
-        console.log('error edit', error);
         dispatch({ type: EDIT_TODO_FAILED, payload: { error } });
       });
   },

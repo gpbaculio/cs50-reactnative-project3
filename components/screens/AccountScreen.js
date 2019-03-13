@@ -13,7 +13,7 @@ class AccountScreen extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.profileContainer}>
-          <Text> User Info </Text>
+          <Text style={styles.info}> User Info </Text>
           <View style={styles.dataContainer}>
             <Text style={styles.data}> {this.props.id} </Text>
             <Text style={styles.key}> id </Text>
@@ -22,27 +22,33 @@ class AccountScreen extends Component {
             <Text style={styles.data}> {this.props.email} </Text>
             <Text style={styles.key}> email </Text>
           </View>
+          <Button onPress={this.logout} title="Logout" color="#841584" />
         </View>
-        <Button onPress={this.logout} title="Logout" color="#841584" />
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  info: {
+    marginBottom: 20
+  },
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
   },
   profileContainer: {
     width: '50%',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 20
   },
   dataContainer: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 5
+    marginBottom: 20
   },
   data: {
     borderBottomColor: '#ccc',
